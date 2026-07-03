@@ -348,7 +348,7 @@ class Model(ModelSettings):
         self.info = self.get_model_info(model)
 
         # Are all needed keys/params available?
-        res = self.validate_environment()
+        res = self.validate_environment(
         self.missing_keys = res.get("missing_keys")
         self.keys_in_environment = res.get("keys_in_environment")
 
@@ -600,7 +600,7 @@ class Model(ModelSettings):
     def __str__(self):
         return self.name
 
-    def get_weak_model(self, provided_weak_model_name):
+    def get_weak_model(self, provided_weak_model_name: str):
         # If weak_model_name is provided, override the model settings
         if provided_weak_model_name:
             self.weak_model_name = provided_weak_model_name
@@ -647,7 +647,7 @@ class Model(ModelSettings):
     def tokenizer(self, text):
         return litellm.encode(model=self.name, text=text)
 
-    def token_count(self, messages):
+    def token_count(self, messages: list[dict] | str) -> int:
         if type(messages) is list:
             try:
                 return litellm.token_counter(model=self.name, messages=messages)
@@ -982,7 +982,7 @@ class Model(ModelSettings):
 
             os.environ[openai_api_key] = token
 
-    def send_completion(self, messages, functions, stream, temperature=None):
+    def send_completion(self, messages: list[dict], functions: list[dict] | None, stream: bool, temperature: float | None = None) -> tuple[bytes, Any]:
         if os.environ.get("AIDER_SANITY_CHECK_TURNS"):
             sanity_check_messages(messages)
 
@@ -1012,7 +1012,7 @@ class Model(ModelSettings):
         if self.is_ollama() and "num_ctx" not in kwargs:
             num_ctx = int(self.token_count(messages) * 1.25) + 8192
             kwargs["num_ctx"] = num_ctx
-        key = json.dumps(kwargs, sort_keys=True).encode()
+        key = json.dumps(kwargs_json: str, sort_keys=True).encode()
 
         # dump(kwargs)
 
